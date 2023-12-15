@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Call Option Simulator - Result</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<style>
+    /* Style for the table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Style for table headers */
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    /* Style for table rows */
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* Style for table cells */
+    td, th {
+        padding: 10px;
+        text-align: left;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="row" style="margin-top: 3em;">
+            <div class="col-md-6">
+                <!-- Left side with logo -->
+                <img src="https://th.bing.com/th/id/R.71fdf0b3354522c5c27fdcb754d49d10?rik=B9RnH2fmJNJ4hw&riu=http%3a%2f%2fwww.ics-csr.com%2fimg%2flogos%2funipi_logo_ecsc.png&ehk=sLUpy8UUIu76j%2b98wsPQJy3Ip%2f1Vw4DCpnl8F282BGs%3d&risl=&pid=ImgRaw&r=0" alt="University of Pireaus" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <!-- Right side with text -->
+                <p>Department of Statistics and Insurance Science</p>
+                <p><strong>MSc Actuarial Science and Risk Management</strong></p>
+                <p>Course: Principles of Economics and Financial Mathematics</p>
+            </div>
+        </div>
+    </div>
+    <div style=" margin-top: 5em; margin-left: 1em; margin-right: 1em;">
+        <h1 class="text-center">Call Option Simulator - Result</h1>
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h2 class="card-title">Call Option Price</h2>
+                        <p class="card-text">Position: <strong>{{ position }}</strong></p>
+                        <p class="card-text">The calculated call option price is: <strong>{{ call_option_price }}</strong></p>
+                        <p class="card-text">Long Premium: <strong>{{ long_premium }}</strong></p>
+                        <p class="card-text">Short Premium: <strong>{{ short_premium }}</strong></p>
+                        <p class="card-text">Total Profit/Loss: <strong>{{ profit_loss }}</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Call Option Payoff at Expiration</h2>
+                        <canvas id="callOptionChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Return to Home Page</a>
+        </div>
+    </div>
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Team 1. All Rights Reserved.</p>
+            <p>This work has been conducted by:</p>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Diamantaras Nikolaos</td>
+                        <td>MAE23003</td>
+                    </tr>
+                    <tr>
+                        <td>Genouzis Ioannis</td>
+                        <td>MAE23004</td>
+                    </tr>
+                    <tr>
+                        <td>Poulou Efthymia</td>
+                        <td>MAE23002</td>
+                    </tr>
+                    <tr>
+                        <td>Verouchis Georgios</td>
+                        <td>MAE23001</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </footer>
+    
+    <script>
+        var position = "{{ position }}";
+        var call_option_price = {{ call_option_price }};
+        var long_premium = {{ long_premium }};
+        var short_premium = {{ short_premium }};
+        var profit_loss = {{ profit_loss }};
+    
+        var labels = ['Stock Price', 'Strike Price'];
+        var data = [0, 0];
+    
+        // Define the stock price range for the chart (adjust as needed)
+        var stockPriceRange = Array.from({ length: 21 }, (_, i) => i * 10);
+    
+        // Calculate the call option payoff for each stock price
+        var callOptionPayoff = stockPriceRange.map(function(stockPrice) {
+            if (position === 'long') {
+                return Math.max(stockPrice - call_option_price + long_premium, long_premium);
+            } else if (position === 'short') {
+                return Math.min(call_option_price - stockPrice + short_premium, short_premium);
+            } else {
+                return 0;
+            }
+        });
+    
+        var ctx = document.getElementById('callOptionChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'line', // Use a line chart for payoff
+            data: {
+                labels: stockPriceRange,
+                datasets: [{
+                    label: 'Call Option Payoff',
+                    data: callOptionPayoff,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0, // Hide data points for a smoother curve
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Profit/Loss'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Stock Price at Expiration'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    
+    
+    
+</body>
+</html>
