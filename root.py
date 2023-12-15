@@ -158,6 +158,4 @@ def simulate():
         return render_template('error.html', error_message=error_message)
 
 
-if __name__ == '__main__':
-    app.run()
 
