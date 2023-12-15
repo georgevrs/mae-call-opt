@@ -4,4 +4,4 @@ numpy==1.26.2
 flask-session==0.5.0
 scipy==1.11.4
 werkzeug == 2.2.3
-Gunicorn==20.1.0
+
