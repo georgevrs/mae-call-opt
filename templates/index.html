@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Options Simulation</title>
+    <!-- Include necessary CSS and JavaScript libraries -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Include jQuery -->
+
+</head>
+<style>
+    /* Style for the table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Style for table headers */
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    /* Style for table rows */
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* Style for table cells */
+    td, th {
+        padding: 10px;
+        text-align: left;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="row" style="margin-top: 3em;">
+            <div class="col-md-6">
+                <!-- Left side with logo -->
+                <img src="https://th.bing.com/th/id/R.71fdf0b3354522c5c27fdcb754d49d10?rik=B9RnH2fmJNJ4hw&riu=http%3a%2f%2fwww.ics-csr.com%2fimg%2flogos%2funipi_logo_ecsc.png&ehk=sLUpy8UUIu76j%2b98wsPQJy3Ip%2f1Vw4DCpnl8F282BGs%3d&risl=&pid=ImgRaw&r=0" alt="University of Pireaus" class="img-fluid">
+            </div>
+            <div class="col-md-6">
+                <!-- Right side with text -->
+                <p>Department of Statistics and Insurance Science</p>
+                <p><strong>MSc Actuarial Science and Risk Management</strong></p>
+                <p>Course: Principles of Economics and Financial Mathematics</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4" style="margin-left: 15%; margin-right: 15%;">
+        <canvas id="historicalStockChart"></canvas>
+    </div>
+
+    <div class="container mt-5" style="font-size: xx-large;">
+        <h1>Call Option Simulation:</h1>
+
+        <form method="POST" action="/simulate">
+        <!-- Dropdown to select stocks -->
+        <div class="form-group">
+            <label for="stockSelect">Select a Stock:</label>
+            <select class="form-control"  id="stockSelect" name="stockSelect">
+                {% for stock in example_stocks %}
+                    <option value="{{ stock.symbol }}">{{ stock.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="position">Select Position:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="position" id="longPosition" value="long" required>
+                <label class="form-check-label" for="longPosition">Long</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="position" id="shortPosition" value="short" required>
+                <label class="form-check-label" for="shortPosition">Short</label>
+            </div>
+        </div>
+        
+        
+        <!-- Input fields for maturity and striking price -->
+        <div class="form-group">
+            <label for="start_date">Start Date:</label>
+            <input type="date" name="start_date" required><br>
+        </div>
+        <div class="form-group">
+            <label for="end_date">End Date:</label>
+            <input type="date" name="end_date" required><br>
+        </div>
+        <div class="form-group">
+            <label for="interest_rate">Interest Rate (%):</label>
+            <input type="number" name="interest_rate" required><br>
+        </div>
+        <div class="form-group">
+            <label for="volatility">Volatility (%):</label>
+            <input type="number" name="volatility" required><br>
+        </div>
+        
+        <div class="form-group">
+            <label for="strikeInput">Striking Price:</label>
+            <input type="number" class="form-control" id="strikeInput" name="strikeInput" placeholder="Enter striking price">
+        </div>
+        <div class="form-group">
+            <label for="premium">Premium:</label>
+            <input type="number" step="0.01" class="form-control" id="premium" name="premium" required>
+        </div>
+        
+        
+        <!-- Button to generate option charts -->
+        <button class="btn btn-primary" id="generateButton2">Generate Option Charts</button>
+    </form>
+        
+        <!-- Chart.js container for displaying option charts -->
+            
+    </div>
+    <div class="mt-5" style="margin-left: 15%; margin-right: 15%;"> <canvas id="optionChart"></canvas></div>
+   
+    <!-- Footer section -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Team 1. All Rights Reserved.</p>
+            <p>This work has been conducted by:</p>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Diamantaras Nikolaos</td>
+                        <td>MAE23003</td>
+                    </tr>
+                    <tr>
+                        <td>Genouzis Ioannis</td>
+                        <td>MAE23004</td>
+                    </tr>
+                    <tr>
+                        <td>Poulou Efthymia</td>
+                        <td>MAE23002</td>
+                    </tr>
+                    <tr>
+                        <td>Verouchis Georgios</td>
+                        <td>MAE23001</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </footer>
+
+   
+</body>
+ <!-- JavaScript code to handle user input and generate charts -->
+ <!-- Include the full jQuery library -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+ <script>
+   $(document).ready(function () {
+            // Function to generate historical stock chart
+            function generateHistoricalStockChart() {
+                // Retrieve the selected stock symbol
+                var stockSymbol = $("#stockSelect").val();
+
+                // Fetch historical stock data using yfinance
+                $.ajax({
+                    type: "GET",
+                    url: "/get_historical_stock_data?stock_symbol=" + stockSymbol,
+                    success: function (data) {
+                        var ctx = document.getElementById('historicalStockChart').getContext('2d');
+                        var historicalStockChart = new Chart(ctx, {
+                            type: 'line',
+                            data: data,
+                            options: {
+                                responsive: true
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Function to generate option chart
+            function generateOptionCharts() {
+                var stockSymbol = $("#stockSelect").val();
+                var maturity = $("#maturityInput").val();
+                var strikingPrice = $("#strikeInput").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/get_stock_data",
+                    data: {
+                        stock_symbol: stockSymbol,
+                        maturity: maturity,
+                        striking_price: strikingPrice
+                    },
+                    success: function (data) {
+                        var ctx = document.getElementById('optionChart').getContext('2d');
+                        var optionChart = new Chart(ctx, {
+                            type: 'line',
+                            data: data,
+                            options: {
+                                responsive: true
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Generate historical stock chart on page load
+            generateHistoricalStockChart();
+
+            // Generate historical stock chart when the stock selection changes
+            $("#stockSelect").change(function () {
+                generateHistoricalStockChart();
+            });
+
+            // Generate option chart on button click
+            $("#generateButton").click(function () {
+                generateOptionCharts();
+            });
+        });
+</script>
+</html>
